@@ -1,0 +1,107 @@
+<odoo>
+    <data>
+        <!-- Hide product price -->
+        <template id="product_item_hide_price" inherit_id="website_sale.products_item">
+            <xpath expr="//div[hasclass('product_price')]" position="replace"></xpath>
+        </template>
+        <!-- Active category list -->
+        <record id="website_sale.products_categories" model="ir.ui.view">
+            <field name="active" eval="True"/>
+        </record>
+        <!-- Disable alternative products -->
+        <record id="website_sale.suggested_products_list" model="ir.ui.view">
+            <field name="active" eval="False"/>
+        </record>
+        <!-- Disable product attributes -->
+        <record id="website_sale.products_attributes" model="ir.ui.view">
+            <field name="active" eval="False"/>
+        </record>
+        <!-- Disable select quantity -->
+        <record id="website_sale.product_quantity" model="ir.ui.view">
+            <field name="active" eval="False"/>
+        </record>
+        <!-- Hide add to cart-->
+        <!-- <template id="product_hide_add_to_cart" inherit_id="website_sale.product"><xpath expr="//form" position="replace"></xpath></template> -->
+        <!-- Replace single product view -->
+        <template id="product_replace" inherit_id="website_sale.product">
+            <xpath expr="//div[@id='wrap']" position="replace">
+                <section t-attf-class="container mt8 oe_website_sale #{(compute_currency(product.lst_price) - product.website_price) &gt; 0.01 and website.get_current_pricelist().discount_policy == 'without_discount'  and 'discount'}" id="product_detail">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <ol class="breadcrumb">
+                                <li>
+                                    <a t-att-href="keep(category=0)">Products</a>
+                                </li>
+                                <li t-if="category">
+                                    <a t-att-href="keep('/shop/category/%s' % slug(category), category=0)" t-field="category.name" />
+                                </li>
+                                <li class="active">
+                                    <span t-field="product.name" />
+                                </li>
+                            </ol>
+                        </div>
+                        <div class="col-sm-3 mb8">
+                            <t t-call="website_sale.search" />
+                        </div>
+                        <div id="website_published_button" class="col-sm-3">
+                            <t t-call="website.publish_management" groups="sales_team.group_sale_manager">
+                                <t t-set="object" t-value="product" />
+                                <t t-set="publish_edit" t-value="True" />
+                                <t t-set="action" t-value="'product.product_template_action'" /></t>
+                        </div>
+                        <div class="col-sm-2 text-right">
+                            <t t-call="website_sale.pricelist_list" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-7">
+                            <span itemprop="image" t-field="product.image" t-options="{'widget': 'image', 'class': 'product_detail_img', 'alt-field': 'name', 'zoom': 'image'}" groups="!website_sale.group_website_multi_image"/>
+                            <t groups="website_sale.group_website_multi_image">
+                                <t t-set="variant_img" t-value="product.product_variant_id.image_variant"/>
+                                <t t-set="image_ids" t-value="product.product_image_ids"/>
+                                <div id="o-carousel-product" class="carousel slide" data-ride="carousel" data-interval="0">
+                                    <div class="carousel-outer">
+                                        <div class="carousel-inner">
+                                            <div class="item active" itemprop="image" t-field="product.image" t-options="{'widget': 'image', 'class': 'product_detail_img js_variant_img', 'alt-field': 'name', 'zoom': 'image', 'unique': product['__last_update']}"/>
+                                            <div t-if="variant_img" class="item" itemprop="image" t-field="product.product_variant_id.image" t-options="{'widget': 'image', 'class': 'product_detail_img', 'alt-field': 'name', 'zoom': 'image', 'unique': product['__last_update'] + (product.product_variant_id['__last_update'] or '')}"/>
+                                            <t t-if="len(image_ids)" t-foreach="image_ids" t-as="pimg">
+                                                <div class="item" t-field="pimg.image" t-options='{"widget": "image", "class": "product_detail_img", "alt-field": "name", "zoom": "image" }'/>
+                                            </t>
+                                        </div>
+                                        <t t-if="len(image_ids) or variant_img">
+                                            <a class="carousel-control left" href="#o-carousel-product" role="button" data-slide="prev">
+                                                <span class="fa fa-chevron-left" aria-hidden="true"/>
+                                                <span class="sr-only">Previous</span>
+                                            </a>
+                                            <a class="carousel-control right" href="#o-carousel-product" role="button" data-slide="next">
+                                                <span class="fa fa-chevron-right" aria-hidden="true"/>
+                                                <span class="sr-only">Next</span>
+                                            </a>
+                                        </t>
+                                    </div>
+                                    <ol class="carousel-indicators" t-if="len(image_ids) or variant_img">
+                                        <li data-target="#o-carousel-product" data-slide-to="0" class="active">
+                                            <img class="img img-responsive js_variant_img_small" t-attf-src="/website/image/product.template/{{product.id}}/image/90x90" t-att-alt="product.name"/>
+                                        </li>
+                                        <li t-if="variant_img" data-target="#o-carousel-product" data-slide-to="1" class="">
+                                            <img class="img img-responsive" t-attf-src="/website/image/product.product/{{product.product_variant_id.id}}/image/90x90" t-att-alt="product.name"/>
+                                        </li>
+                                        <t t-if="len(image_ids)" t-foreach="image_ids" t-as="pimg">
+                                            <li data-target="#o-carousel-product" t-att-data-slide-to="pimg_index + (variant_img and 2 or 1)">
+                                                <img class="img img-responsive" t-attf-src="/website/image/product.image/{{pimg.id}}/image/90x90" t-att-alt="pimg.name"/>
+                                            </li>
+                                        </t>
+                                    </ol>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="col-sm-5 col-lg-4 col-lg-offset-1" id="product_details">
+                            <h1 itemprop="name" t-field="product.name">Product Name</h1>
+                        </div>
+                    </div>
+                </section>
+                <div itemprop="description" t-field="product.website_description" class="oe_structure mt16" id="product_full_description" />
+            </xpath>
+        </template>
+    </data>
+</odoo>

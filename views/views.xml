@@ -1,0 +1,74 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    <!--
+    <record model="ir.ui.view" id="odoocustomization.list">
+      <field name="name">odoocustomization list</field>
+      <field name="model">odoocustomization.odoocustomization</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </tree>
+      </field>
+    </record>
+    -->
+
+    <!-- actions opening views on models -->
+    <!--
+    <record model="ir.actions.act_window" id="odoocustomization.action_window">
+      <field name="name">odoocustomization window</field>
+      <field name="res_model">odoocustomization.odoocustomization</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    -->
+
+    <!-- server action to the one above -->
+    <!--
+    <record model="ir.actions.server" id="odoocustomization.action_server">
+      <field name="name">odoocustomization server</field>
+      <field name="model_id" ref="model_odoocustomization_odoocustomization"/>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": self._name,
+        }
+      </field>
+    </record>
+    -->
+
+    <!-- Top menu item -->
+    <!--
+    <menuitem name="odoocustomization" id="odoocustomization.menu_root"/>
+    -->
+    <!-- menu categories -->
+    <!--
+    <menuitem name="Menu 1" id="odoocustomization.menu_1" parent="odoocustomization.menu_root"/>
+    <menuitem name="Menu 2" id="odoocustomization.menu_2" parent="odoocustomization.menu_root"/>
+    -->
+    <!-- actions -->
+    <!--
+    <menuitem name="List" id="odoocustomization.menu_1_list" parent="odoocustomization.menu_1"
+              action="odoocustomization.action_window"/>
+    <menuitem name="Server to list" id="odoocustomization" parent="odoocustomization.menu_2"
+              action="odoocustomization.action_server"/>
+    -->
+    <record id="customized_sale_order" model="ir.ui.view">
+        
+        <field name="name">customized.sale.order</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+          
+          <xpath expr="//field[@name='partner_id']" position="after">
+              <field name="able_to_approve"  invisible="1"/>
+              <field name="is_technical_approved" attrs="{'readonly' : [('able_to_approve','=',False)]}" />
+              <field name="quotation_type" widget="selection"/>
+          </xpath>
+          
+        </field>
+    </record>
+  </data>
+</odoo>
